@@ -42,48 +42,99 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-          child: Container(
-        padding: EdgeInsets.symmetric(vertical: 200, horizontal: 30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TeXView(
-              child: TeXViewColumn(children: [
-                TeXViewInkWell(
-                    child: TeXViewDocument(
-                        r"\(\sum_{i=1}^{n}i^k = 1^k + 2^k + \cdots + n^k\)",
-                        style: TeXViewStyle(
-                            textAlign: TeXViewTextAlign.Center,
-                            fontStyle: TeXViewFontStyle(fontSize: 40))),
-                    id: "id_0")
-              ]),
-              style: TeXViewStyle(
-                elevation: 10,
-                borderRadius: TeXViewBorderRadius.all(25),
-                border: TeXViewBorder.all(TeXViewBorderDecoration(
-                    borderColor: Colors.blue,
-                    borderStyle: TeXViewBorderStyle.Solid,
-                    borderWidth: 5)),
-                backgroundColor: Colors.white,
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 200, horizontal: 30),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              TeXView(
+                child: TeXViewColumn(children: [
+                  TeXViewInkWell(
+                      child: TeXViewDocument(
+                          r"$$\sum_{i=1}^{n}i^k = 1^k + 2^k + \cdots + n^k$$",
+                          style: TeXViewStyle(
+                              textAlign: TeXViewTextAlign.Center,
+                              fontStyle: TeXViewFontStyle(fontSize: 40))),
+                      id: "id_0")
+                ]),
+                style: TeXViewStyle(
+                  elevation: 10,
+                  borderRadius: TeXViewBorderRadius.all(25),
+                  border: TeXViewBorder.all(TeXViewBorderDecoration(
+                      borderColor: Colors.blue,
+                      borderStyle: TeXViewBorderStyle.Solid,
+                      borderWidth: 5)),
+                  backgroundColor: Colors.white,
+                ),
               ),
-            ),
-            TextField(
-              controller: text,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                  hintText: "100이하의 정수를 입력하세요.", labelText: "k=?"),
-            ),
-            TextButton(
-              onPressed: () {
-                k = int.parse(text.text);
-                text.text = "";
-                Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEqPage(title: '공식 보기')));
-              },
-              child: Text("공식 보기"),
+              TextField(
+                controller: text,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                    hintText: "100이하의 정수를 입력하세요.", labelText: "k=?"),
+              ),
+              TextButton(
+                onPressed: () {
+                  k = int.parse(text.text);
+                  text.text = "";
+                  sum = "대기중..";
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEqPage(title: '공식 보기')));
+                },
+                child: Text("공식 보기"),
+              ),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => HelpPage(title: '설명')));
+        },
+        label: Text("작동 원리"),
+        icon: Icon(Icons.help),
+      ),
+    );
+  }
+}
+
+class HelpPage extends StatefulWidget {
+  const HelpPage({Key? key, required this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  State<HelpPage> createState() => _HelpState();
+}
+
+class _HelpState extends State<HelpPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            TeXView(
+              child: TeXViewInkWell(
+                id: "id_10",
+                child: TeXViewDocument(
+                  r"""$$(x+1)^a = \sum_{i=0}^{a}\binom{a}{i}x^{a-i}$$은 항등식이다.
+                  따라서, $$(x+1)^a - x^a = \sum_{i=1}^{a}\binom{a}{i}x^{a-i}$$역시 성립한다.
+                  $$\begin{align}
+                    2^a - 1^a &= \sum_{i=1}^a\binom{a}{i}1^{a-i} \\
+                    3^a - 2^a &= \sum_{i=1}^a\binom{a}{i}2^{a-i} \\
+                    &\vdots \\
+                    (n+1)^a - n^a &= \sum_{i=1}^a\binom{a}{i}n^{a-i}
+                  \end{align}$$
+                  """
+                )
+              )
             )
           ],
         ),
-      )),
+      ),
     );
   }
 }
@@ -175,7 +226,7 @@ class _DisplayEqState extends State<DisplayEqPage> {
                             child: TextField(
                               decoration: InputDecoration(
                                 labelText: "n=?",
-                                hintText: "원하는 수를 입력하세요."
+                                hintText: "100만 이하의 수를 입력하세요."
                               ),
                               keyboardType: TextInputType.number,
                               controller: text,
@@ -187,6 +238,9 @@ class _DisplayEqState extends State<DisplayEqPage> {
                               onPressed: () async {
                                 n = int.parse(text.text);
                                 text.text = "";
+                                setState(() {
+                                  sum ="대기중..";
+                                });
                                 dynamic response, json;
                                 response = await http.get(Uri.parse("http://arduinocc04.tech/getVal?k=$k&n=$n"));
                                 if(response.statusCode == 200) {
@@ -199,7 +253,7 @@ class _DisplayEqState extends State<DisplayEqPage> {
                             ),
                           ),
                           Container(
-                            child: Text("값: $sum"),
+                            child: Text("1~n까지의 합: $sum"),
                           )
                         ],
                       ),
