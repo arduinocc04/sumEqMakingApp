@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tex/flutter_tex.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
-int k = 0, n = 0, sum = 0;
+int k = 0, n = 0;
+String sum = "";
 void main() {
   runApp(const MyApp());
 }
@@ -70,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
               controller: text,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                  hintText: "200이하의 정수를 입력하세요.", labelText: "k=?"),
+                  hintText: "100이하의 정수를 입력하세요.", labelText: "k=?"),
             ),
             TextButton(
               onPressed: () {
@@ -184,12 +185,14 @@ class _DisplayEqState extends State<DisplayEqPage> {
                             child: TextButton(
                               child: Text("값 찾기"),
                               onPressed: () async {
+                                n = int.parse(text.text);
+                                text.text = "";
                                 dynamic response, json;
                                 response = await http.get(Uri.parse("http://arduinocc04.tech/getVal?k=$k&n=$n"));
                                 if(response.statusCode == 200) {
                                   json = convert.jsonDecode(response.body) as Map<String, dynamic>;
                                   setState(() {
-                                    sum = int.parse(json['val']);
+                                    sum = json['val'];
                                   });
                                 }
                               },

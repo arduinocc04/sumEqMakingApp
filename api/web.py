@@ -44,7 +44,7 @@ def getvalNK():
     n = int(request.args.get('n'))
     k = int(request.args.get('k'))
     jsonFile = OrderedDict()
-    jsonFile['val'] = getValNaive(k, n)
+    jsonFile['val'] = str(getValNaive(k, n))
     return jsonify(jsonFile)
 
 if __name__ == '__main__':
