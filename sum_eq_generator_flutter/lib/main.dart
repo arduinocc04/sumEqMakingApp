@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tex/flutter_tex.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
-int k = 0;
+int k = 0, n = 0, sum = 0;
 void main() {
   runApp(const MyApp());
 }
@@ -75,6 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
             TextButton(
               onPressed: () {
                 k = int.parse(text.text);
+                text.text = "";
                 Navigator.push(context, MaterialPageRoute(builder: (context) => DisplayEqPage(title: '공식 보기')));
               },
               child: Text("공식 보기"),
@@ -100,7 +101,7 @@ class _DisplayEqState extends State<DisplayEqPage> {
     dynamic json;
     dynamic response;
     try{
-      response = await http.get(Uri.parse("http://localhost/?k=$k"));
+      response = await http.get(Uri.parse("http://arduinocc04.tech/?k=$k"));
       if(response.statusCode == 200) {
         json = convert.jsonDecode(response.body) as Map<String, dynamic>;
       }
@@ -115,7 +116,7 @@ class _DisplayEqState extends State<DisplayEqPage> {
     print(json);
     return json['tex'];
   }
-
+  var text = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,14 +143,64 @@ class _DisplayEqState extends State<DisplayEqPage> {
                     );
                   } 
                   else {
-                    return Container(
-                      child: TeXView(
-                        child: TeXViewInkWell(
-                          child: TeXViewDocument(snapshot.data),
-                          id: "id_1"
-                        )
-                      )
-                    );
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                            child: TeXView(
+                              child: TeXViewInkWell(
+                                child: TeXViewDocument(
+                                  r'\(' + snapshot.data + r'\)',
+                                  style: TeXViewStyle(
+                                    textAlign: TeXViewTextAlign.Center,
+                                    fontStyle: TeXViewFontStyle(fontSize: 10)
+                                  ),
+                                ),
+                                id: "id_1"
+                              ),
+                              style: TeXViewStyle(
+                                elevation: 10,
+                                borderRadius: TeXViewBorderRadius.all(25),
+                                border: TeXViewBorder.all(TeXViewBorderDecoration(
+                                    borderColor: Colors.blue,
+                                    borderStyle: TeXViewBorderStyle.Solid,
+                                    borderWidth: 5)),
+                                backgroundColor: Colors.white,
+                              )
+                            )
+                          ),
+                          Container(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                labelText: "n=?",
+                                hintText: "원하는 수를 입력하세요."
+                              ),
+                              keyboardType: TextInputType.number,
+                              controller: text,
+                            ),
+                          ),
+                          Container(
+                            child: TextButton(
+                              child: Text("값 찾기"),
+                              onPressed: () async {
+                                dynamic response, json;
+                                response = await http.get(Uri.parse("http://arduinocc04.tech/getVal?k=$k&n=$n"));
+                                if(response.statusCode == 200) {
+                                  json = convert.jsonDecode(response.body) as Map<String, dynamic>;
+                                  setState(() {
+                                    sum = int.parse(json['val']);
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                          Container(
+                            child: Text("값: $sum"),
+                          )
+                        ],
+                      ),
+                    );   
                   }
                 },
               )

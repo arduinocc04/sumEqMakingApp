@@ -39,6 +39,14 @@ def main():
     jsonFile['tex'] = tmp
     return jsonify(jsonFile)
 
+@app.route('/getVal', methods=['GET'])
+def getvalNK():
+    n = int(request.args.get('n'))
+    k = int(request.args.get('k'))
+    jsonFile = OrderedDict()
+    jsonFile['val'] = getValNaive(k, n)
+    return jsonify(jsonFile)
+
 if __name__ == '__main__':
     app.run('0.0.0.0', port=80, debug=False)
     myLogger.debug("server start!")
